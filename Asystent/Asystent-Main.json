@@ -1,0 +1,1199 @@
+{
+  "name": "Asystent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        16
+      ],
+      "id": "30aa125f-53ff-4533-aa22-85b626cfe6a2",
+      "name": "Telegram Trigger",
+      "webhookId": "33d0e16e-8e39-4db6-9d3b-9facdab8de46",
+      "credentials": {
+        "telegramApi": {
+          "id": "lgK2b5XBhNWZqR8r",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "2b1f0c43-477c-4453-9d2f-965f5e78a4f3",
+      "name": "OpenAI Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "gLvP4CrGNzPEFvu0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        -464
+      ],
+      "id": "2dbf7816-6527-447a-a608-d9233fa7b4d4",
+      "name": "Send a text message",
+      "webhookId": "4a41d836-3eb3-4322-ba30-011b68cf91d5",
+      "credentials": {
+        "telegramApi": {
+          "id": "lgK2b5XBhNWZqR8r",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ !!$json.message.text }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "e618f727-4e70-4242-bc20-b843e6d82a18"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "784f0cba-4dc6-4fca-8421-92aff62b53b9",
+                    "leftValue": "={{ !!$json.message.audio }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bd01bb76-b914-4210-84f8-7742535bff2c",
+                    "leftValue": "={{ !!$json.message.voice }}",
+                    "rightValue": "={{ $json.message.voice }}",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "f13f1840-7645-4e45-ba9e-f092d19ae64a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "949dfae9-6777-4072-95ca-381013a2b82a",
+      "name": "Get a file",
+      "webhookId": "cdf12c38-077e-4fd8-821b-6d8595aaf661",
+      "credentials": {
+        "telegramApi": {
+          "id": "lgK2b5XBhNWZqR8r",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        48,
+        128
+      ],
+      "id": "cf749a9e-3d11-481a-a372-44ef423d0be0",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "gLvP4CrGNzPEFvu0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a35cf466-3502-4e11-9bec-6d54c1e53b7a",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        128
+      ],
+      "id": "3f8e6fc2-96d2-4a30-ad80-4e8eaf01c122",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72381f65-2c9a-4de5-8f57-6d07623888b7",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        -160
+      ],
+      "id": "9aef0752-4829-4b8f-bbba-ec0b593ba36a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Wiadomość nie jest textem ani wiadomością głosową",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "3dbcaa9b-0f27-45c8-9623-26294304a79f",
+      "name": "Send a text message1",
+      "webhookId": "4a41d836-3eb3-4322-ba30-011b68cf91d5",
+      "credentials": {
+        "telegramApi": {
+          "id": "lgK2b5XBhNWZqR8r",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nJeśli  twoja ostania wiadomość  zaczyna się od \"Progress APP\" wybierz na podstawie kontekstu odpowiednia opcje dialogową:\n- Jeśli kontekst dotyczy książki: otwórz arkusz \"Książki\" i dodaj wiersz z datą {{$now}}, tytułem książki i liczbą stron podaną przez użytkownika.\n- Jeśli kontekst dotyczy wagi: otwórz arkusz \"Waga\" i dodaj wiersz z datą {{$now}} i wagą podaną przez użytkownika.\n- Jeśli kontekst dotyczy siłowni: otwórz arkusz \"Siłownia\" i dodaj wiersz z datą {{$now}} oraz ciężarami podanymi przez użytkownika w odpowiednich kolumnach.\nZawsze wybieraj tylko jedną z powyższych opcji — tę, która pasuje do kontekstu wiadomości. Nie pytaj o dane z innych kategorii.\n{{ $json.text }} ",
+        "options": {
+          "systemMessage": "=W czym mogę dziś pomóc {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        -240
+      ],
+      "id": "00c30f97-0993-45c6-8bc5-79a2e0c5c401",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "Asystent_klucz_sesja"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        -16
+      ],
+      "id": "934b3465-31ff-45a7-b9c5-2ee126db5100",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "dziedzicfilip00@gmail.com",
+          "mode": "list",
+          "cachedResultName": "dziedzicfilip00@gmail.com"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1152,
+        208
+      ],
+      "id": "9933d821-53cf-4486-8d6f-cdc91771e9c2",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "4k08mCfAglM2C7wA",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "dziedzicfilip00@gmail.com",
+          "mode": "list",
+          "cachedResultName": "dziedzicfilip00@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', `it is the id of the specific event`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        896,
+        176
+      ],
+      "id": "d70f03d9-666f-47e0-b84d-2496488d5721",
+      "name": "Delete an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "4k08mCfAglM2C7wA",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "dziedzicfilip00@gmail.com",
+          "mode": "list",
+          "cachedResultName": "dziedzicfilip00@gmail.com"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ $now.plus({ week: 4 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        112
+      ],
+      "id": "8dcf390b-7c1d-43ec-858e-ae3d182b9b59",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "4k08mCfAglM2C7wA",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "dziedzicfilip00@gmail.com",
+          "mode": "list",
+          "cachedResultName": "dziedzicfilip00@gmail.com"
+        },
+        "eventId": "={{ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": false,
+        "updateFields": {
+          "end": "={{ $fromAI('End', ``, 'string') }}",
+          "start": "={{ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        224
+      ],
+      "id": "10943899-3efb-46bd-8c98-5a21eaa91fd0",
+      "name": "Update an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "4k08mCfAglM2C7wA",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MDAyMjkwMzY2MjcwOTc4MjEzOTA6MDow",
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        -160
+      ],
+      "id": "76d672c3-04b5-485f-a6a5-5afdfbf77534",
+      "name": "Get many tasks in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "BLD7yzb5paDXQshc",
+          "name": "Google Tasks account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "task": "MDAyMjkwMzY2MjcwOTc4MjEzOTA6MDow",
+        "title": "={{ $fromAI('Title', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        32
+      ],
+      "id": "f504bdfc-6d15-4e6d-bcac-0f5de164698d",
+      "name": "Create a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "BLD7yzb5paDXQshc",
+          "name": "Google Tasks account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "task": "MDAyMjkwMzY2MjcwOTc4MjEzOTA6MDow",
+        "taskId": "={{ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        -128
+      ],
+      "id": "4871c1b9-14e0-4c9a-b00a-08e571c9c19f",
+      "name": "Delete a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "BLD7yzb5paDXQshc",
+          "name": "Google Tasks account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "task": "MDAyMjkwMzY2MjcwOTc4MjEzOTA6MDow",
+        "taskId": "={{ $fromAI('Task_ID', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        -64
+      ],
+      "id": "43294e59-ab16-428f-8a4f-88b8bf74a499",
+      "name": "Update a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "BLD7yzb5paDXQshc",
+          "name": "Google Tasks account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "repository",
+        "owner": {
+          "__rl": true,
+          "value": "DziedzicFilip",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Scrims",
+          "mode": "list",
+          "cachedResultName": "Scrims",
+          "cachedResultUrl": "https://github.com/DziedzicFilip/Scrims"
+        },
+        "returnAll": true,
+        "getRepositoryIssuesFilters": {
+          "assignee": "DziedzicFilip"
+        }
+      },
+      "type": "n8n-nodes-base.githubTool",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        80
+      ],
+      "id": "52e2fbe9-14a8-49e4-92de-7c2bdd99c005",
+      "name": "Get issues of a repository in GitHub",
+      "webhookId": "f34af4a1-98d9-486f-9450-b7f5a4022553",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "bqGC2FTTuZ2k1t2C",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU",
+          "mode": "list",
+          "cachedResultName": "ProgressAPP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sheet', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        384,
+        384
+      ],
+      "id": "ab97658e-b5c3-4208-8152-0e1a055b8099",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iI1HMLNVqE4D2l0C",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU",
+          "mode": "list",
+          "cachedResultName": "ProgressAPP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 164236844,
+          "mode": "list",
+          "cachedResultName": "Waga",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit#gid=164236844"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Data', ``, 'string') }}",
+            "Waga": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Waga', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Waga"
+          ],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Waga",
+              "displayName": "Waga",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        528,
+        400
+      ],
+      "id": "522a9265-ca1e-4db1-99cd-f1d0c1ac6ea6",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iI1HMLNVqE4D2l0C",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU",
+          "mode": "list",
+          "cachedResultName": "ProgressAPP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 599594186,
+          "mode": "list",
+          "cachedResultName": "Siłownia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit#gid=599594186"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Data__using_to_match_', ``, 'string') }}",
+            "Płaska ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('P_aska_', ``, 'string') }}",
+            "OHP ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('OHP_', ``, 'string') }}",
+            "wyciąg plecy poziom": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('wyci_g_plecy_poziom', ``, 'string') }}",
+            "FarmerWalk": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('FarmerWalk', ``, 'string') }}",
+            "Biceps1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Biceps1', ``, 'string') }}",
+            "Tricpes1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tricpes1', ``, 'string') }}",
+            "Hantle Klata/Brama": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Hantle_Klata_Brama', ``, 'string') }}",
+            "wznosy": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('wznosy', ``, 'string') }}",
+            "Podciąganie": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Podci_ganie', ``, 'string') }}",
+            "FacePull": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('FacePull', ``, 'string') }}",
+            "Biceps2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Biceps2', ``, 'string') }}",
+            "Tricpes2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tricpes2', ``, 'string') }}",
+            "Chwyt2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chwyt2', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Data"
+          ],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Płaska ",
+              "displayName": "Płaska ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "OHP ",
+              "displayName": "OHP ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "wyciąg plecy poziom",
+              "displayName": "wyciąg plecy poziom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FarmerWalk",
+              "displayName": "FarmerWalk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Biceps1",
+              "displayName": "Biceps1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tricpes1",
+              "displayName": "Tricpes1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hantle Klata/Brama",
+              "displayName": "Hantle Klata/Brama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "wznosy",
+              "displayName": "wznosy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Podciąganie",
+              "displayName": "Podciąganie",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FacePull",
+              "displayName": "FacePull",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Biceps2",
+              "displayName": "Biceps2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tricpes2",
+              "displayName": "Tricpes2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Chwyt2",
+              "displayName": "Chwyt2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        656,
+        400
+      ],
+      "id": "941232e9-7d6e-4485-bd31-6deaa72f2e16",
+      "name": "Append row in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iI1HMLNVqE4D2l0C",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU",
+          "mode": "list",
+          "cachedResultName": "ProgressAPP",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 509456857,
+          "mode": "list",
+          "cachedResultName": "Książki",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JwnxNQEVMd9imJuCPi608hp6E-XI2twgRHp4CYRDMXU/edit#gid=509456857"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Data', ``, 'string') }}",
+            "Tytuł ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tytu__', ``, 'string') }}",
+            "Strony": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Strony', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Tytuł "
+          ],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tytuł ",
+              "displayName": "Tytuł ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Strony",
+              "displayName": "Strony",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        816,
+        432
+      ],
+      "id": "5efba935-ff95-435f-ac6c-c4b6c1281002",
+      "name": "Append row in sheet in Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iI1HMLNVqE4D2l0C",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many tasks in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get issues of a repository in GitHub": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e509dbf6-d0a8-435c-80c6-b0b50e49a147",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9aa6cb9dba24f565b357e1753abe79606442fa4a6525fec9a92c77ff8fcc3ff0"
+  },
+  "id": "AK15QUzqMvJn1nPL",
+  "tags": []
+}

@@ -1,0 +1,355 @@
+{
+  "name": "Github-notifi",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "DziedzicFilip",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "Scrims",
+          "mode": "list",
+          "cachedResultName": "Scrims",
+          "cachedResultUrl": "https://github.com/DziedzicFilip/Scrims"
+        },
+        "events": [
+          "issues"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "6a843f75-345e-4520-a8d0-896f0815c4f4",
+      "name": "Github Trigger",
+      "webhookId": "194bcfce-419e-40a0-9d9a-e235fc81b925",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "bqGC2FTTuZ2k1t2C",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Polecenie }}\n\n",
+        "options": {
+          "systemMessage": "=New Action on issue  \n{{ $('Github Trigger').item.json.body.action }}\n{{ $('Github Trigger').item.json.body.issue.url }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -176
+      ],
+      "id": "319f0be4-753e-4eee-924a-47e5e160c938",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        48
+      ],
+      "id": "26031b2f-b65b-454e-b3fb-81c24e9bb197",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gLvP4CrGNzPEFvu0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6750721676",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        96
+      ],
+      "id": "29be0122-ec7d-4a47-bf55-88879805c8c5",
+      "name": "Send a text message in Telegram",
+      "webhookId": "16993b48-74e4-4b9d-a6e5-b5da3b336b6e",
+      "credentials": {
+        "telegramApi": {
+          "id": "lgK2b5XBhNWZqR8r",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9a59d943-1662-4d21-8d61-4498d8b788a2",
+              "leftValue": "={{ $json.body.issue.assignee.login }}",
+              "rightValue": "DziedzicFilip",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "d9564f71-e2b7-437a-9a33-3ec89c1518b5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1ef18ebe-37e3-4ea4-8f84-4be407a02b82",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "assigned",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -96
+      ],
+      "id": "a108cd8f-527c-490e-a5f7-de7a1d2d870b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c84f838-5c24-4cef-aeda-9540070147c9",
+              "name": "Polecenie",
+              "value": "=Wyślij wiadomość o przypisaniu do taska i stwórz zadanie w liście O nazwie {{ $json.body.repository.name }} Issue {{ $('Github Trigger').item.json.body.issue.title }}\n{{ $('Github Trigger').item.json.body.action }}\n{{ $json.body.issue.html_url }}\n{{ $('Github Trigger').item.json.body.issue.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -208
+      ],
+      "id": "19d4a1d3-aa27-4c01-a98f-0a38e057997b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6c643745-e837-415a-8f7f-0f0e577f4dfa",
+              "name": "Polecenie",
+              "value": "=Wyślij  tylko powiadomienie o nowym akcji \n{{ $('Github Trigger').item.json.body.action }}\n{{ $json.body.issue.html_url }}\n{{ $('Github Trigger').item.json.body.issue.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "2bde5def-0ba4-4456-a96e-3268db4f2126",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "task": "MDAyMjkwMzY2MjcwOTc4MjEzOTA6MDow",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        800,
+        128
+      ],
+      "id": "a6e3d738-b321-4a47-b702-dac55b9e6a85",
+      "name": "Create a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "BLD7yzb5paDXQshc",
+          "name": "Google Tasks account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message in Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2ee1d93f-1d1d-4637-a123-6dd7c7aa9515",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9aa6cb9dba24f565b357e1753abe79606442fa4a6525fec9a92c77ff8fcc3ff0"
+  },
+  "id": "Ie9Hxsd1HORf0bt8",
+  "tags": []
+}
